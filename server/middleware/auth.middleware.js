@@ -1,45 +1,66 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
-export const isAuthenticated = async (req, res, next) => {
-  // Check if token exists in cookies
-  const token = req.cookies.token;
-  if (!token) {
-    throw new AppError(
-      "You are not logged in. Please log in to get access.",
-      401
-    );
-  }
+export const authMiddleware = async (req, res, next) => {
+  // // Check if token exists
+  // const token = req.cookies.token;
+  // if (!token) {
+  //   throw new Error(
+  //     "You are not logged in. Please log in to get access."
+  //   );
+  // }
 
+  // try {
+  //   // Verify token
+  //   const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+
+  //   // Add user ID to request
+  //   req.id = decoded.userId;
+  //   const user = await User.findById(req.id);
+  //   if (!user) {
+  //     throw new Error("User not found");
+  //   }
+
+  //   req.user = user;
+
+  //   next();
+  // } catch (error) {
+  //   if (error.name === "JsonWebTokenError") {
+  //     throw new Error("Invalid token. Please log in again.");
+  //   }
+  //   if (error.name === "TokenExpiredError") {
+  //     throw new Error("Your token has expired. Please log in again.");
+  //   }
+  //   throw error;
+  // }
   try {
-    // Verify token
-    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-
-    // Add user ID to request
-    req.id = decoded.userId;
-    const user = await User.findById(req.id);
-    if (!user) {
-      throw new Error("User not found");
+     const token = req.cookies.token;
+    if(!token){
+        return res.status(401).json({success:false, message:"not authenticated"})
     }
 
-    req.user = user;
-
+    const decoded=jwt.verify(
+        token,
+        process.env.JWT_SECRET
+    )
+    
+    req.user=decoded;
     next();
+
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      throw new Error("Invalid token. Please log in again.");
-    }
-    if (error.name === "TokenExpiredError") {
-      throw new Error("Your token has expired. Please log in again.");
-    }
-    throw error;
+        console.error("Authentication error:", error);
+
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token"
+        });
   }
 };
+
 
 // Middleware for role-based access control
 export const restrictTo = (...roles) => {
   return async (req, res, next) => {
-    // roles is an array ['admin', 'instructor']
     if (!roles.includes(req.user.role)) {
       throw new Error(
         "You do not have permission to perform this action",
@@ -60,7 +81,6 @@ export const optionalAuth = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    // If token is invalid, just continue without authentication
     next();
   }
 };

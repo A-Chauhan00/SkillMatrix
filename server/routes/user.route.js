@@ -1,40 +1,30 @@
 import express from "express";
 import {
-    authenticateUser,
-    changeUserPassword,
-    createUserAccount,
+    loginUser,
+    registerUser,
     deleteUserAccount,
-    getCurrentUserProfile,
+    getCurrentUser,
     logoutUser,
     updateUserProfile
 } from "../controllers/user.controller.js";
-import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { authMiddleware} from "../middleware/auth.middleware.js";
 import upload from "../utils/multer.js";
-import { validateSignup, validateLogin, validatePasswordChange } from "../middleware/validation.middleware.js";
+
 
 const router = express.Router();
 
 // Auth routes
-router.post("/signup", validateSignup, createUserAccount);
-router.post("/login", validateLogin, authenticateUser);
+router.post("/signin", registerUser);
+router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 
 // Profile routes
-router.get("/profile", isAuthenticated, getCurrentUserProfile);
+router.get("/profile", authMiddleware, getCurrentUser);
 router.patch("/profile", 
-    isAuthenticated, 
+    authMiddleware, 
     upload.single("avatar"), 
     updateUserProfile
 );
 
-// Password management
-router.patch("/change-password",
-    isAuthenticated,
-    validatePasswordChange,
-    changeUserPassword
-);
-
-// Account management
-router.delete("/account", isAuthenticated, deleteUserAccount);
 
 export default router;

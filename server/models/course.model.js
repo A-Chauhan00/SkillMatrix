@@ -71,21 +71,21 @@ const courseSchema= new mongoose.Schema({
   
 },
 {timestamps:true,
-    toJSON:{virtuals:true},
-toObject:{virtuals:true}
+//     toJSON:{virtuals:true},
+// toObject:{virtuals:true}
 }
 
 )
 
-courseSchema.virtual('averageRating').get(function(next){
-    //////s
-})
+// courseSchema.virtual('averageRating').get(function(next){
+//     //////s
+// })
 
-courseSchema.pre('save',function(next){
-          if(this.lectures){
-             this.totalLectures = this.lectures.length;
-          }
-          next();
-})
+// courseSchema.pre('save',function(next){
+//           if(this.lectures){
+//              this.totalLectures = this.lectures.length;
+//           }
+//           next();
+// })
 
-export const Course= mongoose.model("Course",courseSchema);
+ export const Course= mongoose.model("Course",courseSchema);

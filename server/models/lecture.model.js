@@ -36,11 +36,11 @@ const lectureSchema= new mongoose.Schema({
 },
 {timestamps:true})
 
-lectureSchema.pre('save',function(next){
-   if(this.duration){
-    this.duration=Math.round(this.duration*100)/100;
-   }
-   next();
-})
+// lectureSchema.pre('save',function(next){
+//    if(this.duration){
+//     this.duration=Math.round(this.duration*100)/100;
+//    }
+//    next();
+// })
 
 export const Lecture= mongoose.model("Lecture",lectureSchema);

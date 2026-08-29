@@ -8,7 +8,7 @@ import dotenv from "dotenv";
     cloud_name:process.env.CLOUD_NAME
  })
 
- export const uploadMedia =async(file)=>{
+ export const uploadToCloudinary =async(file)=>{
     try {
         const uploadResponse =await cloudinary.uploader.upload(file,{resource_type:"auto"})
         return uploadResponse;

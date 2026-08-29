@@ -55,27 +55,27 @@ const coursePurchaseSchema=new mongoose.Schema({
 
 },
 {timestamps:true,
-    toJSON:{virtuals:true},
-    toObject:{virtuals:true}
+    // toJSON:{virtuals:true},
+    // toObject:{virtuals:true}
 });
 
-coursePurchaseSchema.index({user:1,course:1})
-coursePurchaseSchema.index({status:1})
-coursePurchaseSchema.index({createdAt:-1})
+// coursePurchaseSchema.index({user:1,course:1})
+// coursePurchaseSchema.index({status:1})
+// coursePurchaseSchema.index({createdAt:-1})
 
 
-coursePurchaseSchema.virtual('isRefundable').get(function(){
-    if(this.status!=completed) return false;
-    const thirtyDaysAgo =new Date(Date.now()-30*24*60*60*1000);
-    return this.createdAt>thirtyDaysAgo
-})
+// coursePurchaseSchema.virtual('isRefundable').get(function(){
+//     if(this.status!=completed) return false;
+//     const thirtyDaysAgo =new Date(Date.now()-30*24*60*60*1000);
+//     return this.createdAt>thirtyDaysAgo
+// })
 
-//method to process refund
-coursePurchaseSchema.methods.processRefund=async function(reason,amount){
-    this.status="refunded";
-    this.reason=reason;
-    this.refundAmount=amount|| this.amount;
-    return this.save();
-}
+// //method to process refund
+// coursePurchaseSchema.methods.processRefund=async function(reason,amount){
+//     this.status="refunded";
+//     this.reason=reason;
+//     this.refundAmount=amount|| this.amount;
+//     return this.save();
+// }
 
 export const CoursePurchase= mongoose.model("CoursePurchase",coursePurchaseSchema);

@@ -51,21 +51,21 @@ const courseProgressSchema= new mongoose.Schema({
     timestamps:true,
 })
 
-//calculate course completion
-courseProgressSchema.pre('save',function (next) {
-    if(this.lectureProgress.length>0){
-        const completedLectures=this.lectureProgress.filter(lp=>lp.isCompleted).length;
-        this.completionPercentage=Math.round((completedLectures/this.lectureProgress.length)*100)
-        this.isCompleted=this.completionPercentage===100
-    }
-    next();
-})
+// //calculate course completion
+// courseProgressSchema.pre('save',function (next) {
+//     if(this.lectureProgress.length>0){
+//         const completedLectures=this.lectureProgress.filter(lp=>lp.isCompleted).length;
+//         this.completionPercentage=Math.round((completedLectures/this.lectureProgress.length)*100)
+//         this.isCompleted=this.completionPercentage===100
+//     }
+//     next();
+// })
 
 
-//update last accessed
-courseProgressSchema.methods.updatelastAccessed=function(){
-    this.lastAccessed=Date.now()
-    return this.save({ValidateBeforeSave:false})
-}
+// //update last accessed
+// courseProgressSchema.methods.updatelastAccessed=function(){
+//     this.lastAccessed=Date.now()
+//     return this.save({ValidateBeforeSave:false})
+// }
 
 export const CourseProgress= mongoose.model("COurseProgress",courseProgressSchema);
