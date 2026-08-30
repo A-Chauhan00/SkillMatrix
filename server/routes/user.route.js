@@ -26,5 +26,7 @@ router.patch("/profile",
     updateUserProfile
 );
 
+router.delete("/profile", authMiddleware, deleteUserAccount);
+
 
 export default router;
