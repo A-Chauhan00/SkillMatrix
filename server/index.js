@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import userRoutes from './routes/user.route.js';
+import courseRoutes from './routes/course.route.js';
+import courseProgressRoutes from './routes/courseProgress.route.js';
 dotenv.config();
 
 const app=express();
@@ -60,6 +62,8 @@ app.use(cors({
 
 //routes
 app.use("/api/user",userRoutes);
+app.use("/api/courses",courseRoutes);
+app.use("/api/courseProgress",courseProgressRoutes)
 
 
 //404 handler

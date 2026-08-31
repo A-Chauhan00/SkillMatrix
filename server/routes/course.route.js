@@ -3,23 +3,36 @@ import {
     createNewCourse,
     updateCourse,
     searchCourses,
-    addLectureToCourse,
-    getMyCreatedCourse,
+    addLectureToCourses,
+    getMyCreatedCourses,
     getCourseDetails,
     getCourseLectures,
     deleteCourse} from "../controllers/course.controller.js";
+    import upload from "../utils/multer.js";
+    import {authMiddleware,authorizeRoles} from "../middleware/auth.middleware.js";
 
 const router =express.Router();
 
-router.post("/courses",createNewCourse);
+router.get("/:courseId",getCourseDetails);
 
 router.get("/search",searchCourses);
-router.post("/courses/:id/lectures", addLectureToCourse);
 
-router.get("/courses/",getMyCreatedCourse);
+router.get("/:courseId/lectures", authMiddleware, getCourseLectures);
 
-router.delete("/courses/:id",deleteCourse);
 
-router.get("/courses/:id/lectures",getCourseLectures);
+//instructor admin only routes
+router.use(authMiddleware, authorizeRoles("instructor", "admin"));
 
-router.get("/:id",getCourseDetails);
+router.post( "/create",upload.single("thumbnail"),createNewCourse);
+
+router.put("/:courseId",
+  authMiddleware, upload.single("thumbnail"),updateCourse);
+
+router.post( "/:courseId/lectures", upload.single("video"),addLectureToCourses);
+
+router.get("/instructor/my-courses", getMyCreatedCourses);
+
+router.delete("/:courseId",deleteCourse);
+
+
+export default router;

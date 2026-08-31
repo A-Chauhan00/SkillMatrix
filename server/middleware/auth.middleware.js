@@ -2,37 +2,6 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
 export const authMiddleware = async (req, res, next) => {
-  // // Check if token exists
-  // const token = req.cookies.token;
-  // if (!token) {
-  //   throw new Error(
-  //     "You are not logged in. Please log in to get access."
-  //   );
-  // }
-
-  // try {
-  //   // Verify token
-  //   const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-
-  //   // Add user ID to request
-  //   req.id = decoded.userId;
-  //   const user = await User.findById(req.id);
-  //   if (!user) {
-  //     throw new Error("User not found");
-  //   }
-
-  //   req.user = user;
-
-  //   next();
-  // } catch (error) {
-  //   if (error.name === "JsonWebTokenError") {
-  //     throw new Error("Invalid token. Please log in again.");
-  //   }
-  //   if (error.name === "TokenExpiredError") {
-  //     throw new Error("Your token has expired. Please log in again.");
-  //   }
-  //   throw error;
-  // }
   try {
      const token = req.cookies.token;
     if(!token){
@@ -44,7 +13,7 @@ export const authMiddleware = async (req, res, next) => {
         process.env.JWT_SECRET
     )
     
-    req.user=decoded;
+    req.user = await User.findById(decoded.id || decoded.userId).select("-password");
     next();
 
   } catch (error) {
@@ -59,13 +28,22 @@ export const authMiddleware = async (req, res, next) => {
 
 
 // Middleware for role-based access control
-export const restrictTo = (...roles) => {
-  return async (req, res, next) => {
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    // Check if the logged-in user's role is included in allowed roles
     if (!roles.includes(req.user.role)) {
-      throw new Error(
-        "You do not have permission to perform this action",
-        403
-      );
+      return res.status(403).json({
+        success: false,
+        message: `Role (${req.user.role}) is not authorized to access this resource.`,
+      });
     }
     next();
   };
