@@ -1,13 +1,13 @@
 import express from 'express';
-import morgan from "morgan";
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import userRoutes from './routes/user.route.js';
 import courseRoutes from './routes/course.route.js';
 import courseProgressRoutes from './routes/courseProgress.route.js';
+import coursePurchaseRoutes from './routes/courseProgress.route.js';
+
 dotenv.config();
 
 const app=express();
@@ -21,28 +21,12 @@ const limiter=rateLimit({
 })
 
 app.use('/api',limiter);
-app.use(helmet());
-
-//logger middleware
-if(process.env.NODE_ENV==="development"){
-    app.use(morgan('dev'));
-}
 
 
 app.use(express.json({limit:'10kb'}));
 app.use(express.urlencoded({extended:true, limit:"10kb"}));
 app.use(cookieParser());
 
-
-//global error handler
-app.use((err,req,res,next)=>{
-    console.error(err.stack);
-    res.status(err.status||500).json({
-        status:"error",
-        message:err.message||"internal server error",
-        ...(process.env.NODE_ENV==='development' && {stack:err.stack})
-    })
-})
 
 //cors
 app.use(cors({
@@ -60,10 +44,17 @@ app.use(cors({
     ]
 })) 
 
+
+    app.get('/', (req, res) => {
+  res.send('SkillMatrix backend');
+})
+
+
 //routes
 app.use("/api/user",userRoutes);
 app.use("/api/courses",courseRoutes);
-app.use("/api/courseProgress",courseProgressRoutes)
+app.use("/api/courseProgress",courseProgressRoutes);
+app.use("api/purchase",coursePurchaseRoutes);
 
 
 //404 handler

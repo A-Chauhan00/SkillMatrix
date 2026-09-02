@@ -1,7 +1,7 @@
 import {Course} from "../models/course.model.js";
 import { uploadToCloudinary,deleteMediaFromCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
-import {Lecture} from "../models/lecture.model.js";s
+import {Lecture} from "../models/lecture.model.js";
 
 
 export const createNewCourse = async (req, res) => {
