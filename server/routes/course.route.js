@@ -11,6 +11,16 @@ import {
     import upload from "../utils/multer.js";
     import {authMiddleware,authorizeRoles} from "../middleware/auth.middleware.js";
 
+    import { validate } from '../middleware/validation.middleware.js';
+    import {
+      courseIdParamValidation,
+      lectureIdParamValidation,
+      createCourseValidation,
+      updateCourseValidation,
+      addLectureValidation,
+      updateLectureValidation
+    } from '../validators/course.validator.js';
+
 const router =express.Router();
 
 router.get("/:courseId",getCourseDetails);
@@ -23,12 +33,12 @@ router.get("/:courseId/lectures", authMiddleware, getCourseLectures);
 //instructor admin only routes
 router.use(authMiddleware, authorizeRoles("instructor", "admin"));
 
-router.post( "/create",upload.single("thumbnail"),createNewCourse);
+router.post( "/create",validate(createCourseValidation),upload.single("thumbnail"),createNewCourse);
 
 router.put("/:courseId",
-  authMiddleware, upload.single("thumbnail"),updateCourse);
+  authMiddleware,validate(updateCourseValidation), upload.single("thumbnail"),updateCourse);
 
-router.post( "/:courseId/lectures", upload.single("video"),addLectureToCourses);
+router.post( "/:courseId/lectures",validate(addLectureValidation), upload.single("video"),addLectureToCourses);
 
 router.get("/instructor/my-courses", getMyCreatedCourses);
 

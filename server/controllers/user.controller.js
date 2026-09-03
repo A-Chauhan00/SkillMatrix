@@ -191,7 +191,6 @@ export const updateUserProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    // Handle Mongoose validation errors 
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((val) => val.message);
       return res.status(400).json({
