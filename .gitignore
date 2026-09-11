@@ -10,6 +10,5 @@ build/
 .DS_Store
 
 .postman/
-*.postman_collection.json
-*.postman_environment.json
-*.postman_globals.json
+postman/
+skillmatrix/
