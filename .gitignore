@@ -8,3 +8,8 @@ build/
 
 .vscode/
 .DS_Store
+
+.postman/
+*.postman_collection.json
+*.postman_environment.json
+*.postman_globals.json

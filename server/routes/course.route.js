@@ -13,12 +13,9 @@ import {
 
     import { validate } from '../middleware/validation.middleware.js';
     import {
-      courseIdParamValidation,
-      lectureIdParamValidation,
       createCourseValidation,
       updateCourseValidation,
       addLectureValidation,
-      updateLectureValidation
     } from '../validators/course.validator.js';
 
 const router =express.Router();
@@ -33,12 +30,11 @@ router.get("/:courseId/lectures", authMiddleware, getCourseLectures);
 //instructor admin only routes
 router.use(authMiddleware, authorizeRoles("instructor", "admin"));
 
-router.post( "/create",validate(createCourseValidation),upload.single("thumbnail"),createNewCourse);
+router.post( "/create",upload.single("thumbnail"),validate(createCourseValidation),createNewCourse);
 
-router.put("/:courseId",
-  authMiddleware,validate(updateCourseValidation), upload.single("thumbnail"),updateCourse);
+router.put("/:courseId",upload.single("thumbnail"),validate(updateCourseValidation),updateCourse);
 
-router.post( "/:courseId/lectures",validate(addLectureValidation), upload.single("video"),addLectureToCourses);
+router.post( "/:courseId/lectures", upload.single("video"),validate(addLectureValidation),addLectureToCourses);
 
 router.get("/instructor/my-courses", getMyCreatedCourses);
 

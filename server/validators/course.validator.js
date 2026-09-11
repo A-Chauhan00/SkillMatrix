@@ -22,7 +22,6 @@ export const lectureIdParamValidation = z.object({
   }),
 });
 
-
 export const createCourseValidation = z.object({
   body: z.object({
     title: z
@@ -35,7 +34,8 @@ export const createCourseValidation = z.object({
       .string()
       .trim()
       .max(200, "Subtitle cannot exceed 200 characters")
-      .optional(),
+      .optional()
+      .or(z.literal("")), 
 
     description: z
       .string({ required_error: "Course description is required" })
@@ -47,18 +47,18 @@ export const createCourseValidation = z.object({
       .trim()
       .min(1, "Please select a valid category"),
 
-    level: z.enum(["Beginner", "Medium", "Advance"], {
-      errorMap: () => ({
-        message: "Level must be either Beginner, Medium, or Advance",
-      }),
+    level: z.enum(["beginner", "medium", "advanced"], {
+      message: "Level must be either beginner, medium, or advanced",
     }),
 
     price: z
-      .union([z.string(), z.number()])
-      .transform((val) => Number(val))
-      .pipe(
+      .preprocess(
+        (val) => (val === "" || val === undefined ? undefined : Number(val)),
         z
-          .number({ invalid_type_error: "Price must be a valid number" })
+          .number({
+            required_error: "Price is required",
+            invalid_type_error: "Price must be a valid number",
+          })
           .min(0, "Price cannot be negative")
       ),
   }),
@@ -132,7 +132,13 @@ export const addLectureValidation = z.object({
       .min(3, "Lecture title must be at least 3 characters long")
       .max(100, "Lecture title cannot exceed 100 characters"),
 
-    isPreviewFree: z
+      description: z
+      .string({ required_error: "description is required" })
+      .trim()
+      .min(3, "description must be at least 3 characters long")
+      .max(500, "description cannot exceed 500 characters"),
+
+    isPreview: z
       .union([z.boolean(), z.string()])
       .transform((val) => (typeof val === "string" ? val === "true" : val))
       .optional()

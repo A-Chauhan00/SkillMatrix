@@ -1,0 +1,67 @@
+$kind: http-request
+name: http://localhost:8000/api/courses/6a9c5ec09acdf63b07d7166d/lectures
+description: ""
+url: http://localhost:8000/api/courses/6a9c5ec09acdf63b07d7166d/lectures
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: title
+      value: first course title
+      description: ""
+      disabled: true
+    - type: text
+      key: subtitle
+      value: first course subtitle
+      description: ""
+      disabled: true
+    - type: text
+      key: description
+      value: first course description
+      description: ""
+      disabled: true
+    - type: text
+      key: category
+      value: first course category
+      description: ""
+      disabled: true
+    - type: text
+      key: level
+      value: beginner
+      description: ""
+      disabled: true
+    - type: text
+      key: price
+      value: "100"
+      description: ""
+      disabled: true
+    - type: file
+      key: thumbnail
+      src:
+        - /C:/Users/asus/Downloads/180de64488af56f633aa35fa9c7fa354.jpg
+      description: ""
+      disabled: true
+    - type: file
+      key: thumbnail
+      src:
+        - /C:/Users/asus/Downloads/5515e00ed698714757ab80cba201704b.jpg
+      description: ""
+      disabled: true
+    - type: file
+      key: video
+      src:
+        - /C:/Users/asus/Downloads/YTDown.com_YouTube_Evenings-Ganges-and-the-beauty-of-Janki-_Media_CgL9UPsjf9g_001_720p.mp4
+      description: ""
+      disabled: false
+    - type: text
+      key: title
+      value: first course lecture title
+      description: ""
+      disabled: false
+    - type: text
+      key: description
+      value: first course first lecture description
+      description: ""
+      disabled: false
+order: 1788683980857

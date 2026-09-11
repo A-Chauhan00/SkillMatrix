@@ -1,33 +1,43 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model.js";
+
 
 export const authMiddleware = async (req, res, next) => {
   try {
-     const token = req.cookies.token;
-    if(!token){
-        return res.status(401).json({success:false, message:"not authenticated"})
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
     }
 
-    const decoded=jwt.verify(
-        token,
-        process.env.JWT_SECRET
-    )
-    
-    req.user = await User.findById(decoded.id || decoded.userId).select("-password");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded || !decoded.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
+    req.user = {
+      id: decoded.userId,
+      role: decoded.role,
+    };
+
     next();
-
   } catch (error) {
-        console.error("Authentication error:", error);
-
-        return res.status(401).json({
-            success: false,
-            message: "Invalid or expired token"
-        });
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+      error:error.message
+    });
   }
 };
 
 
-// Middleware for role-based access control
+//  role-based access control
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
 
@@ -38,7 +48,7 @@ export const authorizeRoles = (...roles) => {
       });
     }
 
-    // Check if the logged-in user's role is included in allowed roles
+    // Check if logged-in user's role is allowed 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,

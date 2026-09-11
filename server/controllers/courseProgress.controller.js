@@ -4,7 +4,7 @@ import {Course} from "../models/course.model.js";
 export const getCourseProgress = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.user._id;
+    const userId = req.id;
 
     const course = await Course.findById(courseId);
 
@@ -46,10 +46,9 @@ export const getCourseProgress = async (req, res) => {
       progress,
     });
   } catch (error) {
-    console.error("Error fetching course progress:", error.message);
     return res.status(500).json({
       success: false,
-      message: "An internal server error occurred while fetching course progress.",
+      message: "error occurred fetching course progress",
       error: error.message,
     });
   }
@@ -59,7 +58,7 @@ export const updateLectureProgress = async (req, res) => {
   try {
     const { courseId, lectureId } = req.params;
     const { isCompleted, watchTime } = req.body;
-    const userId = req.user._id;
+    const userId = req.id;
 
 
     const course = await Course.findById(courseId);
@@ -141,10 +140,9 @@ export const updateLectureProgress = async (req, res) => {
       progress,
     });
   } catch (error) {
-    console.error("Error updating lecture progress:", error.message);
     return res.status(500).json({
       success: false,
-      message: "An error occurred while updating lecture progress.",
+      message: " error occurred while updating lecture progress.",
       error: error.message,
     });
   }
@@ -153,7 +151,7 @@ export const updateLectureProgress = async (req, res) => {
 export const markAsCompleted = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.user._id;
+    const userId = req.id;
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -198,10 +196,9 @@ export const markAsCompleted = async (req, res) => {
       progress,
     });
   } catch (error) {
-    console.error("Error marking course as completed:", error.message);
     return res.status(500).json({
       success: false,
-      message: "An error occurred while completing the course.",
+      message: "error occurred while completing the course.",
       error: error.message,
     });
   }
@@ -210,7 +207,7 @@ export const markAsCompleted = async (req, res) => {
 export const resetCourseProgress = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.user._id;
+    const userId = req.id;
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -253,10 +250,9 @@ export const resetCourseProgress = async (req, res) => {
       progress,
     });
   } catch (error) {
-    console.error("Error resetting course progress:", error.message);
     return res.status(500).json({
       success: false,
-      message: "An error occurred while resetting course progress.",
+      message: "error occurred while resetting course progress.",
       error: error.message,
     });
   }

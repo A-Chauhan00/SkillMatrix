@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import connectDB from './database/db.js';
 import userRoutes from './routes/user.route.js';
 import courseRoutes from './routes/course.route.js';
 import courseProgressRoutes from './routes/courseProgress.route.js';
@@ -62,6 +63,18 @@ app.use((req,res)=>{
     res.status(404).json({status:"error",message:"Route not found"});
 })
 
-app.listen(PORT,()=>{
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("MongoDB Connected Successfully");
+   app.listen(PORT,()=>{
     console.log(`Server is running at ${PORT} in ${process.env.NODE_ENV} mode`);
 })
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

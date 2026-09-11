@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 export const registerUser = async (req, res) => {
   try {
      const {name,email,password,role='student'}=req.body;
-     const existingUser= await User.findOne(email);
+     const existingUser= await User.findOne({email});
 
       if (!name || !email || !password) {
             return res.status(400).json({
@@ -31,7 +31,7 @@ export const registerUser = async (req, res) => {
       role
      })
       
-     generateToken(user);
+     generateToken(res,user);
     return res.status(200).json(
       {
         success: true,
@@ -44,10 +44,10 @@ export const registerUser = async (req, res) => {
       });
      
   } catch (error) {
-        console.log("error creating user account", error);
         return res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "an error occured during register user",
+            error: error.message
         });
   }
  
@@ -55,45 +55,54 @@ export const registerUser = async (req, res) => {
 
 
 export const loginUser = async (req, res) => {
- 
   try {
-    const {email,password}=req.body;
-      if(!email || !password){
-        return res.status(400).json({success:false, message:"All fields are required"})
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
-  const user=await User.findOne(email);
 
-   if(!user){
-         return res.status(400).json({success:false, message:"Email or password is incorrect"})
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or password is incorrect",
+      });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password,user.password);
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    if(!isPasswordCorrect){
-        return res.status(409).json({success:false, message:"Email or password is incorrect"})
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or password is incorrect",
+      });
     }
-   
-   generateToken(user);
-    return res.status(200).json(
-      {
-        success: true,
-        message: "User logged in successfully",
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email
-        }
-      }
-    );
 
+    generateToken(res, user);
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged in successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-      console.log("Login error:",error);
-     res.status(500).json({success:false, message:"Couldn't login user"})
+    return res.status(500).json({
+      success: false,
+      message: "Couldn't login user",
+      error: error.message
+    });
   }
-  
-
 };
-
 
 export const logoutUser = async (_, res) => {
  
@@ -110,41 +119,9 @@ export const logoutUser = async (_, res) => {
 };
 
 
-export const getCurrentUser= async (req, res) => {
-  
+export const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("-password");
-
-     if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-
-         res.status(200).json({
-            success: true,
-            message:"user profile fetched successfully",
-            user
-        });
-
-  } catch (error) {
-     console.error("Get current user error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to get user"
-        });
-  }
-};
-
-
-export const updateUserProfile = async (req, res) => {
-  
-  try {
-    const userId = req.userId; 
-    const { name, bio, password } = req.body;
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -153,25 +130,69 @@ export const updateUserProfile = async (req, res) => {
       });
     }
 
-    //  Update basic fields if provided
-    if (name) user.name = name;
-    if (bio !== undefined) user.bio = bio; 
+    return res.status(200).json({
+      success: true,
+      user,
+    });
 
-    //  Handle Avatar File Upload 
-    if (req.file) {
-      const uploadResult = await uploadToCloudinary(
-        req.file.buffer,
-        "skillmatrix/avatars",
-        "image"
-      );
-      user.avatar = uploadResult.secure_url;
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user context",
+      error: error.message,
+    });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+
+    const { name, bio } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    //  deleting old avatar
-       user = await User.findById(req.id)
-      if(user.avatar && user.avatar!='default-avatar.png'){
-        await deleteMediaFromCloudinary(user.avatar);
-       }
+    if (name) user.name = name;
+    if (bio !== undefined) user.bio = bio;
+
+    if (req.file) {
+      const oldAvatarUrl = user.avatar;
+
+      const uploadResult = await uploadToCloudinary(req.file.path);
+
+      if (!uploadResult || !uploadResult.secure_url) {
+        // Clean up if upload fails
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(500).json({
+          success: false,
+          message: "Failed to upload image to Cloudinary",
+        });
+      }
+
+      // Assign new Cloudinary URL
+      user.avatar = uploadResult.secure_url;
+
+      // Clean up old avatar  
+      if (oldAvatarUrl && !oldAvatarUrl.includes("default-avatar")) {
+        try {
+          await deleteMediaFromCloudinary(oldAvatarUrl);
+        } catch (deleteError) {
+          console.error("Failed to delete old avatar", deleteError.message);
+        }
+      }
+    }
 
     await user.save();
 
@@ -185,34 +206,21 @@ export const updateUserProfile = async (req, res) => {
         role: user.role,
         avatar: user.avatar,
         bio: user.bio,
-        enrolledCourses: user.enrolledCourses,
-        createdCourses: user.createdCourses,
-        updatedAt: user.updatedAt,
       },
     });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const messages = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json({
-        success: false,
-        message: messages.join(", "),
-      });
-    }
-
     return res.status(500).json({
       success: false,
-      message: "An internal server error occurred while updating the profile.",
+      message: "An internal server error occurred in updateUserProfile",
       error: error.message,
     });
   }
 };
 
-
 export const deleteUserAccount =async (req, res) => {
   try {
-    const userId = req.userId;
 
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -242,18 +250,17 @@ export const deleteUserAccount =async (req, res) => {
 
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
     return res.status(200).json({
       success: true,
-      message: "Your account and associated data have been permanently deleted.",
+      message: "Your account has been deleted.",
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "An error occurred while attempting to delete your account.",
+      message: "An error occurred while deleting account",
       error: error.message,
     });
   }

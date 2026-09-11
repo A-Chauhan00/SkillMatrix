@@ -6,9 +6,18 @@ export const validate = (schema) => async (req, res, next) => {
       params: req.params,
     });
 
+    
     req.body = parsed.body;
-    req.query = parsed.query;
-    req.params = parsed.params;
+    
+
+    if (parsed.query) {
+      Object.assign(req.query, parsed.query);
+    }
+    
+    if (parsed.params) {
+      Object.assign(req.params, parsed.params);
+    }
+
     next();
   } catch (error) {
     if (error.name === "ZodError") {

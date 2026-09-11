@@ -1,0 +1,44 @@
+$kind: http-request
+name: http://localhost:8000/api/user/profile
+description: ""
+url: http://localhost:8000/api/courses/create
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: title
+      value: ""
+      description: ""
+      disabled: false
+    - type: text
+      key: subtitle
+      value: ""
+      description: ""
+      disabled: false
+    - type: text
+      key: description
+      value: ""
+      description: ""
+      disabled: false
+    - type: text
+      key: category
+      value: ""
+      description: ""
+      disabled: false
+    - type: text
+      key: level
+      value: ""
+      description: ""
+      disabled: false
+    - type: text
+      key: price
+      value: ""
+      description: ""
+      disabled: false
+    - type: file
+      key: thumbnail
+      src: []
+      description: ""
+      disabled: false
+order: 3233553925363169

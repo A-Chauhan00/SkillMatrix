@@ -2,42 +2,67 @@ import {Course} from "../models/course.model.js";
 import { uploadToCloudinary,deleteMediaFromCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import {Lecture} from "../models/lecture.model.js";
-
+import fs from 'fs';
 
 export const createNewCourse = async (req, res) => {
-    try {
-        const { title, subtitle, description, category, level, price, instructor } = req.body;
+  try {
+    const { title, subtitle, description, category, level, price } = req.body;
 
-        let thumbnail;
-        if (req.file) {
-            const result = await uploadToCloudinary(req.file.path);
-            thumbnail = result?.secure_url || req.file.path;
-        } else {
-            throw new Error("Course thumbnail is required");
-        }
-
-        const course = Course.create({
-            title,
-            subtitle,
-            description,
-            category,
-            level,
-            price,
-            instructor: req.id,
-        }
-        );
-
-        // Add course to instructor's created courses
-        await User.findByIdAndUpdate(req.id, {
-            $push: { createdCourses: course._id },
-        });
-        return res.status(200).json({ success: true, message: "course created successfully", course })
-
-    } catch (error) {
-        console.log("error creating course", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Course thumbnail is required.",
+      });
     }
-}
+
+    // 2. Upload thumbnail to Cloudinary
+    const uploadResult = await uploadToCloudinary(req.file.path);
+
+    if (!uploadResult || !uploadResult.secure_url) {
+      // Clean up  file if upload fails
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload course thumbnail to Cloudinary.",
+      });
+    }
+
+    const thumbnailUrl = uploadResult.secure_url;
+
+    const course = await Course.create({
+      title,
+      subtitle,
+      description,
+      category,
+      level,
+      price: price ? Number(price) : 0,
+      thumbnail: thumbnailUrl, 
+      instructor: req.user.id,  
+    });
+
+  
+    await User.findByIdAndUpdate(req.user.id, {
+      $push: { createdCourses: course._id },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Course created successfully.",
+      course,
+    });
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    return res.status(500).json({
+      success: false,
+      message: " error occurred while creating the course.",
+      error: error.message,
+    });
+  }
+};
 
 export const updateCourse = async (req, res) => {
   try {
@@ -47,41 +72,64 @@ export const updateCourse = async (req, res) => {
     const course = await Course.findById(courseId);
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course doesn't exist" });
-    }
-
-    // Verify ownership (or Admin role)
-if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-  return res.status(403).json({
-    success: false,
-    message: "Not authorized to update this course"
-  });
-}
-
-    // Handle thumbnail upload
-    let thumbnail;
-    if (req.file) {
-      if (course.thumbnail) {
-        await deleteMediaFromCloudinary(course.thumbnail);
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
       }
-     
-      const result = await uploadMedia(req.file.buffer || req.file.path);
-      thumbnail = result?.secure_url;
+      return res.status(404).json({
+        success: false,
+        message: "Course doesn't exist",
+      });
     }
 
-    const updatedCourse = await Course.findByIdAndUpdate(
-      courseId,
-      {
-        title,
-        subtitle,
-        description,
-        category,
-        level,
-        price,
-        ...(thumbnail && { thumbnail }),
-      },
-      { new: true, runValidators: true }
-    );
+    if (
+      course.instructor.toString() !== req.user.id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this course",
+      });
+    }
+
+    if (req.file) {
+      const oldThumbnailUrl = course.thumbnail;
+
+      // Upload new thumbnail 
+      const uploadResult = await uploadToCloudinary(req.file.path);
+
+      if (!uploadResult || !uploadResult.secure_url) {
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(500).json({
+          success: false,
+          message: "Failed to upload new thumbnail to Cloudinary",
+        });
+      }
+
+      course.thumbnail = uploadResult.secure_url;
+
+      // Clean up old thumbnail 
+      if (oldThumbnailUrl) {
+        try {
+          await deleteMediaFromCloudinary(oldThumbnailUrl);
+        } catch (deleteError) {
+          console.error("Failed to delete old thumbnail:", deleteError.message);
+        }
+      }
+    }
+
+    if (title) course.title = title;
+    if (subtitle !== undefined) course.subtitle = subtitle;
+    if (description) course.description = description;
+    if (category) course.category = category;
+    if (level) course.level = level;
+    if (price !== undefined) course.price = Number(price);
+
+    const updatedCourse = await course.save();
 
     return res.status(200).json({
       success: true,
@@ -89,8 +137,15 @@ if (course.instructor.toString() !== req.user._id.toString() && req.user.role !=
       updatedCourse,
     });
   } catch (error) {
-    console.error("Error updating course:", error.message);
-    return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the course",
+      error: error.message,
+    });
   }
 };
 
@@ -114,7 +169,7 @@ export const searchCourses=async(req,res)=>{
     ],
   };
 
-  // Apply filters
+  
   if (categories.length > 0) {
     searchCriteria.category = { $in: categories };
   }
@@ -155,8 +210,11 @@ export const searchCourses=async(req,res)=>{
     data: courses,
   });
   } catch (error) {
-        console.log("error creating course", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+        return res.status(500).json({
+           success: false,
+            message: "error occured while searching courses", 
+            error:error.message
+          })
   }
 }
 
@@ -168,10 +226,13 @@ export const addLectureToCourses=async(req,res)=>{
      const course= await Course.findById(courseId);
 
      if(!course){
-        return res.status(400).json({ success: false, message: "Course doesn't exist" })
+        return res.status(400).json({ 
+          success: false,
+           message: "Course doesn't exist" 
+          })
      }
 
-    if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+     if (course.instructor.toString() !== req.user.id.toString() && req.user.role !== "admin"){
   return res.status(403).json({
     success: false,
     message: "Not authorized to update this course"
@@ -179,13 +240,19 @@ export const addLectureToCourses=async(req,res)=>{
 }
   
    if (!req.file) {
-     return res.status(400).json({success:false,message:"Video file is required"});
+     return res.status(400).json({
+      success:false,
+      message:"Video file is required"
+    });
   }
 
   // Upload video to cloudinary
   const result = await uploadToCloudinary(req.file.path);
   if (!result) {
-     return res.status(400).json({success:false,message:"error uploading video"});
+     return res.status(400).json({
+      success:false,
+      message:"error uploading video"
+    });
   }
    
     const lecture = await Lecture.create({
@@ -198,34 +265,25 @@ export const addLectureToCourses=async(req,res)=>{
     duration: result?.duration || 0, 
   });
 
- 
   course.lectures.push(lecture._id);
   await course.save();
 
-   
-     
     return res.status(200).json({
     success: true,
     message:"lecture added successfully",
     lecture
   });
   } catch (error) {
-      console.log("error adding lecture", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+        return res.status(500).json({ 
+          success: false, message: "error occured while adding lecture",
+        error:error.message
+      })
   }
 }
 
-// export const getPublishedCourse=async(req,res)=>{
-//   try {
-     
-//   } catch (error) {
-    
-//   }
-// }
-
 export const getMyCreatedCourses=async(req,res)=>{
   try {
-     const courses = await Course.find({ instructor: req.id }).populate({
+     const courses = await Course.find({ instructor:req.user.id }).populate({
     path: "enrolledStudents",
     select: "name avatar",
   });
@@ -236,8 +294,11 @@ export const getMyCreatedCourses=async(req,res)=>{
     data: courses,
   });
   } catch (error) {
-     console.log("error fetching courses", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+        return res.status(500).json({ 
+          success: false,
+           message: "error occurred whie fetching courses",
+           message:error.message 
+          })
   }
 }
 
@@ -253,7 +314,10 @@ export const getCourseDetails=async(req,res)=>{
     });
 
      if (!course) {
-      return res.status(400).json({ success: false, message: "course not found"  })
+      return res.status(400).json({
+         success: false,
+         message: "course not found"  
+        })
   }
 
     return res.status(200).json({
@@ -263,8 +327,11 @@ export const getCourseDetails=async(req,res)=>{
     } 
   });
   } catch (error) {
-     console.log("error fetching course details", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+        return res.status(500).json({
+           success: false,
+           message: "error while fetching course details",
+          error:error.message
+         })
   }
 }
 
@@ -279,11 +346,14 @@ export const getCourseLectures=async(req,res)=>{
     )
      
      if (!course) {
-     return res.status(400).json({ success: false, message: "couldn't fetch lectures" })
+     return res.status(400).json({
+       success: false, 
+       message: "couldn't fetch lectures" 
+      })
   }
 
     const isEnrolled = course.enrolledStudents.includes(req.id);
-  const isInstructor = course.instructor.toString() === req.id;
+  const isInstructor = course.instructor.toString() ===req.user.id;
 
    let lectures = course.lectures;
   if (!isEnrolled && !isInstructor) {
@@ -303,8 +373,12 @@ export const getCourseLectures=async(req,res)=>{
    
   })
   } catch (error) {
-    console.log("error fetching lectures", error.message)
-        return res.status(500).json({ success: false, message: "internal server error" })
+    
+        return res.status(500).json({ 
+          success: false,
+           message: " error occured while fetching courses",
+           error:error.message
+           })
   }
 }
 
@@ -312,7 +386,6 @@ export const deleteCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-  
     const course = await Course.findById(courseId);
 
     if (!course) {
@@ -321,9 +394,8 @@ export const deleteCourse = async (req, res) => {
         message: "Course not found.",
       });
     }
-
-  
-    const isInstructor = course.instructor.toString() === req.user._id.toString();
+    
+    const isInstructor = course.instructor.toString() === req.user.id.toString();
     const isAdmin = req.user.role === "admin";
 
     if (!isInstructor && !isAdmin) {
@@ -359,18 +431,15 @@ export const deleteCourse = async (req, res) => {
       }
     }
 
-  
     await User.findByIdAndUpdate(course.instructor, {
       $pull: { createdCourses: courseId },
     });
 
-    
     await User.updateMany(
       { "enrolledCourses.course": courseId },
       { $pull: { enrolledCourses: { course: courseId } } }
     );
 
-   
     await course.deleteOne();
 
     return res.status(200).json({
@@ -378,10 +447,9 @@ export const deleteCourse = async (req, res) => {
       message: "Course deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting course:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "error occured while deleting course",
       error: error.message,
     });
   }
