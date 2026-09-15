@@ -2,8 +2,8 @@ import React from 'react'
 
 const HeroSection = () => {
   return (
-   <div className="hero bg-primary min-h-screen ">
-  <div className="hero-content flex-col  lg:flex-row-reverse">
+   <div className="hero bg-primary min-h-screen">
+  <div className="hero-content flex-col bg-primary lg:flex-row-reverse ">
     <img className="max-w-lg rounded-lg shadow-2xl" src="mixed_media9.jpg"/>
     <div className='max-w-lg'>
       <h1 className="font-display font-medium text-8xl font-bold text-primary-content">YOUR POTENTIAL IS BIGGER THAN YOU THINK.</h1>
