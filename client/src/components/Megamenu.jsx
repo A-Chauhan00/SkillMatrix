@@ -3,7 +3,7 @@ import React from 'react'
 const Megamenu = () => {
   return (
    <div>
-     <button className="btn sm:hidden" popoverTarget="my-megamenu-2">Menu</button>
+     <button className="btn sm:hidden text-primary" popoverTarget="my-megamenu-2">Menu</button>
 <div className="megamenu max-sm:megamenu-vertical megamenu-wide p-2 bg-secondary border" id="my-megamenu-2" popover="auto">
   <span className="megamenu-active"></span>
 

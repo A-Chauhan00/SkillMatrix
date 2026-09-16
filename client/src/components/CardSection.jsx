@@ -1,9 +1,9 @@
 import React from 'react';
 import  Card  from './Card.jsx';
-import { ChevronRight,ChevronLeft } from 'lucide';
+import { ChevronRight,ChevronLeft } from 'lucide-react';
 const CardSection = () => {
   return (
-     <div className="carousel w-full bg-secondary">
+    <div className="carousel w-full bg-secondary overflow-x-hidden">
   <div id="slide1" className="carousel-item relative w-full">
    <Card/>
    <Card/>
