@@ -1,23 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 
 
 @theme {
-  --font-display: "Anton", sans-serif;
+  --font-display: "Bebas Neue", sans-serif;
   --font-sans: "Inter", sans-serif;
 }
 
 @plugin "daisyui/theme" {
   name: "mytheme";
-  --color-primary: #163B33;       /*primary background*/
-   --color-primary-content: #BBFFD6; /* Font Color on Primary Elements */
+  --color-primary: #063D30;       /*primary background*/
+  
+  --color-secondary: #BBFFD6;   /*secondary green*/
 
-  --color-secondary: #BBFFD6;   /*secondary background*/
-   --color-secondary-content: #163B33;    /* Font Color on secondary Elements */
+   --color-accent:#FF4D00;      /*accent orange color*/
 
-  --color-base-100: #000000;         /* Page Background */
-   --color-base-content: #ffffff;  /*default font color*/
+  --color-base-100: #EAF2EF;         /* Page Background */
+   --color-base-content: #000000;  /*default font color*/
+
 }
 
 
@@ -25,6 +26,17 @@ h1
  {
   font-family: var(--font-display);
 }
+
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: var(--font-sans);
+}
+
+
 
 html, body {
   width: 100%;

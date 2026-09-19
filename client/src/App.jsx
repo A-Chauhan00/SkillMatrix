@@ -4,17 +4,24 @@ import Home from './pages/Home.jsx';
 import CourseDetails from './pages/CourseDetails.jsx';
 import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
+import LecturePage from './pages/LecturePage.jsx';
 
 function App() {
  
 
   return (
     <>
+    {/* Routes with common navbar */}
     <Routes>
       <Route element={<Layout/>}>
         <Route path="/" element={<Home/>}/>
         <Route path="/course/:id" element={<CourseDetails/>}/>
       </Route>
+    </Routes>
+
+  {/* Routes without navbar */}
+    <Routes>
+        <Route path="/course/:id/lecture/:id" element={<LecturePage/>}/>
     </Routes>
      
     </>

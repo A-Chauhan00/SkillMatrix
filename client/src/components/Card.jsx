@@ -8,11 +8,12 @@ import React from 'react'
       src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
       alt="Shoes" />
   </figure>
-  <div className="card-body bg-primary rounded-b-2xl">
-    <h2 className="card-title text-secondary">Card Title</h2>
+  <div className="card-body bg-base-100 rounded-b-2xl">
+    <h2 className="card-title text-primary">Card Title</h2>
     <p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
-    <div className="card-actions justify-end">
-      <button className="btn btn-secondary text-primary rounded-xl">Buy Now</button>
+    <div className="card-actions justify-between content-center mt-2">
+      <h1 className='text-primary  text-3xl font-bold'>$ 6700 </h1>
+      <button className="btn text-accent border-2 border-accent rounded-xl">Buy Now</button>
     </div>
   </div>
 </div>
