@@ -15,11 +15,11 @@ function App() {
     <Routes>
       <Route element={<Layout/>}>
         <Route path="/" element={<Home/>}/>
-        <Route path="/course/:id" element={<CourseDetails/>}/>
+        <Route path="/course/:courseId" element={<CourseDetails/>}/>
       </Route>
     </Routes>
 
-  {/* Routes without navbar */}
+  {/* Routes without common navbar */}
     <Routes>
         <Route path="/course/:id/lecture/:id" element={<LecturePage/>}/>
     </Routes>

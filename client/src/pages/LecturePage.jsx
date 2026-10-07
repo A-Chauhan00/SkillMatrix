@@ -51,8 +51,8 @@ const LecturePage = () => {
       <header className="flex h-16 items-center justify-between border-b bg-primary px-6">
 
         <div className='flex flex-row'>
-          <h1 className='text-base-100 text-2xl p-2 border-r'> SKILLMATRIX</h1>
-          <h1 className='text-base-100 text-2xl p-2 ml-6 '> This is the course Title</h1>
+          <h1 className='text-base-100 text-xl font-bold p-2 border-r'> SKILLMATRIX</h1>
+          <h1 className='text-base-100 text-xl p-2 ml-6 '> This is the course Title</h1>
         </div>
 
         <button

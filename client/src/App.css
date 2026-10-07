@@ -6,6 +6,7 @@
 @theme {
   --font-display: "Bebas Neue", sans-serif;
   --font-sans: "Inter", sans-serif;
+   --font-impact: "Impact", sans-serif;
 }
 
 @plugin "daisyui/theme" {
@@ -21,11 +22,9 @@
 
 }
 
-
-h1
- {
-  font-family: var(--font-display);
-}
+ h1{
+  font-family:var(--font-display);
+} 
 
 h2,
 h3,

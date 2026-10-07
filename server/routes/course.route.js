@@ -3,6 +3,7 @@ import {
     createNewCourse,
     updateCourse,
     searchCourses,
+    getHomeCourses,
     addLectureToCourses,
     getMyCreatedCourses,
     getCourseDetails,
@@ -20,11 +21,15 @@ import {
 
 const router =express.Router();
 
+router.get("/home",getHomeCourses);
+
 router.get("/:courseId",getCourseDetails);
 
 router.get("/search",searchCourses);
 
 router.get("/:courseId/lectures", authMiddleware, getCourseLectures);
+
+
 
 
 //instructor admin only routes

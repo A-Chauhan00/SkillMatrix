@@ -218,6 +218,37 @@ export const searchCourses=async(req,res)=>{
   }
 }
 
+export const getHomeCourses = async (req, res) => {
+  try {
+    const [featured, beginner] = await Promise.all([
+      Course.find({ isPublished: true, featured: true }) 
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("instructor", "name"), 
+
+      Course.find({ isPublished: true, level: "beginner" }) 
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("instructor", "name"),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        featured,
+        beginner,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching home courses:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch home courses",
+      error: error.message,
+    });
+  }
+};
+
 export const addLectureToCourses=async(req,res)=>{
   try {
     const {courseId}=req.params;
@@ -314,7 +345,7 @@ export const getCourseDetails=async(req,res)=>{
     });
 
      if (!course) {
-      return res.status(400).json({
+      return res.status(404).json({
          success: false,
          message: "course not found"  
         })

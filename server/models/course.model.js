@@ -67,6 +67,10 @@ const courseSchema= new mongoose.Schema({
    totalLectures:{
     type:Number,
     default:0
+   },
+   featured: {
+  type: Boolean,
+  default: false,
    }
   
 },

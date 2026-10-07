@@ -1,51 +1,34 @@
-import React from 'react';
-import  Card  from './Card.jsx';
-import { ChevronRight,ChevronLeft } from 'lucide-react';
-const CardSection = () => {
-  return (
-    <div className="carousel w-full bg-primary overflow-x-hidden">
-  <div id="slide1" className="carousel-item relative w-full">
-   <Card/>
-   <Card/>
-   <Card/>
-   <Card/>
-    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-end">
-      <a href="#slide2" className="btn btn-circle text-primary"><ChevronRight /></a>
-    </div>
-  </div>
-  <div id="slide2" className="carousel-item relative w-full">
-    <Card/>
-   <Card/>
-   <Card/>
-   <Card/>
-    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-      <a href="#slide1" className="btn btn-circle text-primary"><ChevronLeft/></a>
-      <a href="#slide3" className="btn btn-circle text-primary"><ChevronRight/></a>
-    </div>
-  </div>
-  <div id="slide3" className="carousel-item relative w-full">
-    <Card/>
-   <Card/>
-   <Card/>
-   <Card/>
-    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-      <a href="#slide2" className="btn btn-circle text-primary"><ChevronLeft/></a>
-      <a href="#slide4" className="btn btn-circle text-primary"><ChevronRight/></a>
-    </div>
-  </div>
-  <div id="slide4" className="carousel-item relative w-full">
-    <Card/>
-   <Card/>
-   <Card/>
-   <Card/>
-    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-      <a href="#slide3" className="btn btn-circle text-primary"><ChevronLeft/></a>
-      <a href="#slide1" className="btn btn-circle text-primary"><ChevronRight/></a>
-    </div>
-  </div>
-</div>
 
-  )
-}
+import React from "react";
+import Card from "./Card.jsx";
+
+const CardSection = ({ title = "Featured Courses", description, courses = [] }) => {
+
+  if (!courses || courses.length === 0) return null;
+
+  return (
+    <section className="w-full bg-primary px-6 md:px-8 py-10">
+      <div className="mb-6">
+        <h1 className="text-3xl md:text-5xl text-base-100 font-medium tracking-tight">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-base-200/80 text-sm md:text-base mt-2">
+            {description}
+          </p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {courses.map((course) => (
+          <Card
+            key={course._id || course.id} 
+            course={course}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 export default CardSection;
