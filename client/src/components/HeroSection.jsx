@@ -1,6 +1,7 @@
+import { Link} from "react-router-dom";
 
 const HeroSection = () => {
-
+ 
   return (
 
     <section
@@ -28,17 +29,17 @@ const HeroSection = () => {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-5">
-            <a
-              href="#courses"
-
+            <Link to="/login">
+             <button
               className="group inline-flex items-center gap-3 rounded-md bg-accent px-5 py-3 text-sm border font-bold text-white shadow-[0_10px_24px_rgba(255,90,31,0.22)] transition duration-200 hover:-translate-y-1 hover:bg-secondary hover:text-primary hover:border-primary"
             >
-              Get started
+             Start learning
               <span className="text-lg transition-transform group-hover:translate-x-1">
                 →
               </span>
-            </a>
-
+            </button>
+            </Link>
+            
             <a
               href="#courses"
 
