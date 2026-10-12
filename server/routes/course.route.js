@@ -4,7 +4,7 @@ import {
     updateCourse,
     searchCourses,
     getHomeCourses,
-    addLectureToCourses,
+    addLectureToCourse,
     getMyCreatedCourses,
     getCourseDetails,
     getCourseLectures,
@@ -39,7 +39,7 @@ router.post( "/create",upload.single("thumbnail"),validate(createCourseValidatio
 
 router.put("/:courseId",upload.single("thumbnail"),validate(updateCourseValidation),updateCourse);
 
-router.post( "/:courseId/lectures", upload.single("video"),validate(addLectureValidation),addLectureToCourses);
+router.post( "/:courseId/lectures", upload.single("video"),validate(addLectureValidation),addLectureToCourse);
 
 router.get("/instructor/my-courses", getMyCreatedCourses);
 

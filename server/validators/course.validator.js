@@ -47,8 +47,8 @@ export const createCourseValidation = z.object({
       .trim()
       .min(1, "Please select a valid category"),
 
-    level: z.enum(["beginner", "medium", "advanced"], {
-      message: "Level must be either beginner, medium, or advanced",
+    level: z.enum(["beginner", "intermediate", "advanced"], {
+      message: "Level must be either beginner, intermediate, or advanced",
     }),
 
     price: z
@@ -94,9 +94,9 @@ export const updateCourseValidation = z.object({
     category: z.string().trim().min(1, "Category cannot be empty").optional(),
 
     level: z
-      .enum(["Beginner", "Medium", "Advance"], {
+      .enum(["beginner", "intermediate", "advanced"], {
         errorMap: () => ({
-          message: "Level must be either Beginner, Medium, or Advance",
+          message: "Level must be either beginner, intermediate, or advanced",
         }),
       })
       .optional(),

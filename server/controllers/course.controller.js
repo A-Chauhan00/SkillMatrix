@@ -249,7 +249,7 @@ export const getHomeCourses = async (req, res) => {
   }
 };
 
-export const addLectureToCourses=async(req,res)=>{
+export const addLectureToCourse=async(req,res)=>{
   try {
     const {courseId}=req.params;
      const {title, description, isPreview}=req.body;

@@ -7,6 +7,8 @@ import CourseDetails from './pages/CourseDetails.jsx';
 import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import LecturePage from './pages/LecturePage.jsx';
+import InstructorDashboard from './pages/InstructorDashboard.jsx';
+import CreateCourse from './pages/CreateCourse.jsx';
 import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
       <Route element={<Layout/>}>
         <Route path="/" element={<Home/>}/>
         <Route path="/course/:courseId" element={<CourseDetails/>}/>
+        <Route path="/instructor/dashboard" element={<InstructorDashboard/>}/>
+        <Route path="/instructor/create-course" element={<CreateCourse/>}/>
       </Route>
     </Routes>
 

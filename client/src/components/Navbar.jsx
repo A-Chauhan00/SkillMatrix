@@ -66,15 +66,27 @@ const Navbar = () => {
                 </li>
 
                 {/* Dropdown Options */}
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className="flex items-center gap-2 py-2 hover:bg-secondary rounded-md"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </Link>
-                </li>
+                {user.role === "instructor" ? (
+                  <li>
+                    <Link
+                      to="/instructor/dashboard"
+                      className="flex items-center gap-2 py-2 hover:bg-secondary rounded-md"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link
+                      to="/my-learning"
+                      className="flex items-center gap-2 py-2 hover:bg-secondary rounded-md"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      My Learning
+                    </Link>
+                  </li>
+                )}
 
                 <li>
                   <Link
